@@ -41,10 +41,9 @@ y ponlo en `C:\midoryu-server\models\SenseVoiceSmall\model.pt` (pesa casi 1 GB).
    Si Windows te pregunta por el firewall, dale **Permitir** en redes privadas.
 
 ## 7. Apunta el StackChan a tu servidor
-El firmware trae una página de configuración WiFi con un campo para la dirección OTA (lo vi en el código, pero no lo he probado en el aparato). En el modo de
-configuración WiFi aparezca "Advanced options" donde se pone la dirección OTA:
-`http://TU_IP:8003/xiaozhi/ota/`. Si tu pantalla no lo tiene, avísame y te genero una imagen
-nueva con esa dirección ya metida.
+El firmware trae una página de configuración WiFi con un campo para la dirección OTA (lo vi en el código, pero no lo he probado en el aparato). Entra al modo de configuración WiFi del StackChan, abre las opciones avanzadas y pon:
+`http://TU_IP:8003/xiaozhi/ota/`
+Guarda y reinicia. Si tu pantalla no tiene esa opción, avísame y te genero una imagen nueva con la dirección ya metida.
 
 ## Notas
 - La compu tiene que estar prendida y en el mismo WiFi que el StackChan.
