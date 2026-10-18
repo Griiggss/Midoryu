@@ -6,15 +6,19 @@ server:
   websocket: ws://192.168.1.50:8000/xiaozhi/v1/
 
 selected_module:
-  LLM: GeminiLLM
+  LLM: GeminiOpenAI
   TTS: EdgeTTS
 
 LLM:
-  GeminiLLM:
-    type: gemini
+  # Gemini through its OpenAI-compatible endpoint. The native "GeminiLLM" type fails with
+  # "Unknown field for Schema: minimum" because the StackChan's tool definitions use "minimum".
+  GeminiOpenAI:
+    type: openai
     # 2) Free key from https://aistudio.google.com/apikey  (never share it or commit it)
     api_key: PEGA_TU_KEY_AQUI
-    model_name: "gemini-2.0-flash"
+    url: https://generativelanguage.googleapis.com/v1beta/openai/
+    # Model names change; if this one errors, check the current free Flash model in AI Studio.
+    model_name: gemini-2.5-flash
 
 TTS:
   EdgeTTS:
