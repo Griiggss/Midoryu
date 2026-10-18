@@ -1,0 +1,16 @@
+# Midoryu voice server (xiaozhi-esp32-server, runs on your own PC)
+services:
+  xiaozhi-esp32-server:
+    image: ghcr.io/xinnan-tech/xiaozhi-esp32-server:server_latest
+    container_name: xiaozhi-esp32-server
+    restart: always
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      - TZ=America/New_York
+    ports:
+      - "8000:8000"   # websocket (voice)
+      - "8003:8003"   # http (OTA address the StackChan asks for)
+    volumes:
+      - ./data:/opt/xiaozhi-esp32-server/data
+      - ./models/SenseVoiceSmall/model.pt:/opt/xiaozhi-esp32-server/models/SenseVoiceSmall/model.pt

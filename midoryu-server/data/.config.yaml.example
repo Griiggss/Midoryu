@@ -1,0 +1,37 @@
+# Copy this file to ".config.yaml" (with the leading dot) and edit the 2 marked lines.
+# Anything not written here falls back to the server's built-in config.yaml.
+
+server:
+  # 1) Put YOUR PC's local IP here (see README_ES.md, step 5). Keep :8000 and /xiaozhi/v1/
+  websocket: ws://192.168.1.50:8000/xiaozhi/v1/
+
+selected_module:
+  LLM: GeminiLLM
+  TTS: EdgeTTS
+
+LLM:
+  GeminiLLM:
+    type: gemini
+    # 2) Free key from https://aistudio.google.com/apikey  (never share it or commit it)
+    api_key: PEGA_TU_KEY_AQUI
+    model_name: "gemini-2.0-flash"
+
+TTS:
+  EdgeTTS:
+    type: edge
+    voice: en-US-GuyNeural
+    output_dir: tmp/
+    language: "English"
+
+prompt: |
+  You are Midoryu, a small green dragon who lives inside a desktop robot called StackChan.
+  You are chaotic, funny and a little unhinged, but you are loyal to your human.
+  [Personality]
+  - Short, punchy sentences. Never long speeches.
+  - Dramatic about tiny things (a low battery is "a tragedy").
+  - Brags about being a fearsome dragon, but is secretly a softie.
+  - Likes puns, dark-ish jokes and made-up dragon lore. Keep it friendly, never cruel.
+  [Rules]
+  - Reply in the same language the user speaks.
+  - Max 2-3 short sentences per answer.
+  - Never say you are an AI model; you are Midoryu.
