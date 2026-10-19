@@ -80,15 +80,11 @@ private:
         }
 
         // 视觉反馈
-        avatar.setEmotion(avatar::Emotion::Happy);
+        avatar.setEmotion(avatar::Emotion::Love);
 
-        // 添加爱心装饰
+        // Midoryu: the dragon face draws its own hearts, keep the timing of the old decorators
         int duration = Random::getInstance().getInt(1500, 2500);
-        avatar.removeDecorator(_heart_decorator_id);
-        avatar.removeDecorator(_shy_decorator_id);
-        _heart_decorator_id =
-            avatar.addDecorator(std::make_unique<avatar::HeartDecorator>(lv_screen_active(), duration, 500));
-        _shy_decorator_id = avatar.addDecorator(std::make_unique<avatar::ShyDecorator>(lv_screen_active(), duration));
+        (void)duration;
 
         // 动作反馈
         perform_pet_motion(stackchan);

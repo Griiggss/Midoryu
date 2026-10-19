@@ -6,6 +6,7 @@
 #pragma once
 #include "../../avatar/avatar.h"
 #include "../../avatar/elements/feature.h"
+#include "dragon_face.h"
 #include <lvgl.h>
 #include <smooth_lvgl.hpp>
 #include <memory>
@@ -21,11 +22,25 @@ public:
     lv_color_t primaryColor   = lv_color_white();
     lv_color_t secondaryColor = lv_color_black();
 
+    ~DefaultAvatar();
+
     void init(lv_obj_t* parent, const lv_font_t* font = &lv_font_montserrat_16);
     uitk::lvgl_cpp::Container* getPanel() const;
 
+    /**
+     * @brief Midoryu: the face is drawn by DragonFace into an LVGL canvas
+     */
+    void update() override;
+
 private:
+    void render_face(uint32_t now);
+
     std::unique_ptr<uitk::lvgl_cpp::Container> _pannel;
+    std::unique_ptr<DragonFace> _face;
+    lv_obj_t* _canvas          = nullptr;
+    lv_draw_buf_t* _draw_buf   = nullptr;
+    bool _dirty                = true;
+    uint32_t _last_render_ms   = 0;
 };
 
 /**
@@ -35,22 +50,12 @@ private:
 class DefaultEyes : public Feature {
 public:
     DefaultEyes(lv_obj_t* parent, lv_color_t primaryColor, lv_color_t secondaryColor, bool isLeftEye);
-    ~DefaultEyes();
 
-    void setPosition(const uitk::Vector2i& position) override;
-    void setWeight(int weight) override;
-    void setRotation(int rotation) override;
+    // The face itself is drawn by DragonFace; eyes only keep state that modifiers write to
     void setEmotion(const Emotion& emotion) override;
-    void setVisible(bool visible) override;
-    void setSize(int size) override;
 
 private:
-    bool _is_left_eye    = false;
-    int _eyelid_offset_y = 0;
-
-    std::unique_ptr<uitk::lvgl_cpp::Container> _container;
-    std::unique_ptr<uitk::lvgl_cpp::Container> _eye;
-    std::unique_ptr<uitk::lvgl_cpp::Container> _eyelid;
+    bool _is_left_eye = false;
 };
 
 /**
@@ -60,15 +65,6 @@ private:
 class DefaultMouth : public Feature {
 public:
     DefaultMouth(lv_obj_t* parent, lv_color_t primaryColor, lv_color_t secondaryColor);
-    ~DefaultMouth();
-
-    void setPosition(const uitk::Vector2i& position) override;
-    void setWeight(int weight) override;
-    void setRotation(int rotation) override;
-    void setVisible(bool visible) override;
-
-private:
-    std::unique_ptr<uitk::lvgl_cpp::Container> _mouth;
 };
 
 /**

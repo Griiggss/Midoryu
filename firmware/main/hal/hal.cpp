@@ -192,12 +192,14 @@ void Hal::startXiaozhi()
             LvglLockGuard lock;
             auto& avatar = GetStackChan().avatar();
             avatar.addDecorator(std::make_unique<view::ReminderView>(lv_screen_active(), msg));
+            // Midoryu: the dragon breathes fire while the reminder is on screen
+            GetStackChan().addModifier(std::make_unique<stackchan::TimedEmotionModifier>(stackchan::avatar::Emotion::Fire, 5000));
         }
         hal_bridge::app_play_sound(OGG_NEW_NOTIFICATION);
     });
 
     // Start stackchan update task
-    xTaskCreatePinnedToCore(_stackchan_update_task, "stackchan", 4096, NULL, 3, NULL, 1);
+    xTaskCreatePinnedToCore(_stackchan_update_task, "stackchan", 8192, NULL, 3, NULL, 1);
 
     hal_bridge::start_xiaozhi_app();
 }

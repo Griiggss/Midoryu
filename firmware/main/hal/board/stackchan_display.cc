@@ -332,24 +332,47 @@ void StackChanAvatarDisplay::SetEmotion(const char* emotion)
 
     auto& avatar = stackchan.avatar();
 
-    // Map emotion string to stackchan::Emotion
-    if (strcmp(emotion, "neutral") == 0) {
-        avatar.setEmotion(Emotion::Neutral);
-    } else if (strcmp(emotion, "happy") == 0) {
-        avatar.setEmotion(Emotion::Happy);
-    } else if (strcmp(emotion, "laughing") == 0) {
-        avatar.setEmotion(Emotion::Happy);
-    } else if (strcmp(emotion, "angry") == 0) {
-        avatar.setEmotion(Emotion::Angry);
-    } else if (strcmp(emotion, "sad") == 0) {
-        avatar.setEmotion(Emotion::Sad);
-    } else if (strcmp(emotion, "crying") == 0) {
-        avatar.setEmotion(Emotion::Sad);
-    } else if (strcmp(emotion, "sleepy") == 0) {
-        avatar.setEmotion(Emotion::Sleepy);
+    // While the device is listening keep the "listening" face, the server sends neutral at that moment
+    if (is_listening_ && strcmp(emotion, "neutral") == 0) {
+        return;
+    }
+
+    // Map emotion string (XiaoZhi vocabulary + Midoryu aliases) to stackchan::Emotion
+    struct EmotionName {
+        const char* name;
+        Emotion emotion;
+    };
+    static const EmotionName kEmotionNames[] = {
+        {"neutral", Emotion::Neutral},   {"happy", Emotion::Happy},         {"relaxed", Emotion::Happy},
+        {"delicious", Emotion::Happy},   {"winking", Emotion::Happy},       {"laughing", Emotion::Unhinged},
+        {"funny", Emotion::Unhinged},    {"silly", Emotion::Unhinged},      {"unhinged", Emotion::Unhinged},
+        {"crazy", Emotion::Unhinged},    {"angry", Emotion::Angry},         {"sad", Emotion::Sad},
+        {"crying", Emotion::Sad},        {"loving", Emotion::Love},         {"kissy", Emotion::Love},
+        {"love", Emotion::Love},         {"embarrassed", Emotion::Shy},     {"shy", Emotion::Shy},
+        {"surprised", Emotion::Listening}, {"shocked", Emotion::Listening}, {"thinking", Emotion::Thinking},
+        {"confused", Emotion::Doubt},    {"doubtful", Emotion::Doubt},      {"cool", Emotion::Smug},
+        {"confident", Emotion::Smug},    {"smug", Emotion::Smug},           {"fire", Emotion::Fire},
+        {"dragon", Emotion::Fire},       {"dizzy", Emotion::Dizzy},         {"listening", Emotion::Listening},
+        {"error", Emotion::Error},       {"sleepy", Emotion::Sleepy},
+    };
+
+    Emotion mapped = Emotion::Neutral;
+    bool found     = false;
+    for (const auto& e : kEmotionNames) {
+        if (strcmp(emotion, e.name) == 0) {
+            mapped = e.emotion;
+            found  = true;
+            break;
+        }
+    }
+    if (!found) {
+        ESP_LOGW(TAG, "Unknown emotion: %s, using NEUTRAL", emotion);
+    }
+    avatar.setEmotion(mapped);
+
+    if (mapped == Emotion::Sleepy) {
         avatar.setSpeech("Zzz…");
         is_sleeping_ = true;
-        // avatar.mouth().setWeight(10);
 
         // Stop idle motion
         ESP_LOGW(TAG, "Stop idle motion");
@@ -363,12 +386,6 @@ void StackChanAvatarDisplay::SetEmotion(const char* emotion)
         // Return to default pose
         auto& motion = GetStackChan().motion();
         motion.pitchServo().moveWithSpeed(0, 80);
-
-    } else if (strcmp(emotion, "doubtful") == 0) {
-        avatar.setEmotion(Emotion::Doubt);
-    } else {
-        ESP_LOGW(TAG, "Unknown emotion: %s, using NEUTRAL", emotion);
-        avatar.setEmotion(Emotion::Neutral);
     }
 
     // Resync blink modifier base eye weights
@@ -393,7 +410,15 @@ void StackChanAvatarDisplay::SetChatMessage(const char* role, const char* conten
 
     DisplayLockGuard lock(this);
 
-    if (strcmp(role, "system") == 0) {
+    if (strcmp(role, "user") == 0) {
+        // The server understood what was said, now the LLM is working on the answer
+        is_listening_ = false;
+        stackchan.avatar().setEmotion(Emotion::Thinking);
+        auto blink = static_cast<BlinkModifier*>(stackchan.getModifier(blink_modifier_id_));
+        if (blink) {
+            blink->resyncEyeWeights();
+        }
+    } else if (strcmp(role, "system") == 0) {
         stackchan.avatar().setSpeech(content);
     } else if (strcmp(role, "assistant") == 0) {
         stackchan.avatar().setSpeech(content);
@@ -495,7 +520,10 @@ void StackChanAvatarDisplay::SetStatus(const char* status)
     bool is_idle      = false;
     bool is_listening = false;
 
+    is_listening_ = false;
     if (strcmp(status, Lang::Strings::LISTENING) == 0) {
+        is_listening_ = true;
+        avatar.setEmotion(Emotion::Listening);
         if (speaking_modifier_id_ >= 0) {
             // Start speaking
             stackchan.removeModifier(speaking_modifier_id_);
@@ -508,6 +536,10 @@ void StackChanAvatarDisplay::SetStatus(const char* status)
 
     } else if (strcmp(status, Lang::Strings::STANDBY) == 0) {
         _is_xiaozhi_ready = true;
+
+        if (avatar.getEmotion() == Emotion::Listening || avatar.getEmotion() == Emotion::Thinking) {
+            avatar.setEmotion(Emotion::Neutral);
+        }
 
         if (speaking_modifier_id_ >= 0) {
             // Stop speaking
@@ -522,6 +554,10 @@ void StackChanAvatarDisplay::SetStatus(const char* status)
         GetHAL().refreshRgb();
 
     } else if (strcmp(status, Lang::Strings::SPEAKING) == 0) {
+        // Speaking starts: leave the "thinking" face if the server did not send an emotion
+        if (avatar.getEmotion() == Emotion::Thinking) {
+            avatar.setEmotion(Emotion::Neutral);
+        }
         if (speaking_modifier_id_ < 0) {
             speaking_modifier_id_ = stackchan.addModifier(std::make_unique<SpeakingModifier>(0, 180, false));
         }

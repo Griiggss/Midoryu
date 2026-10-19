@@ -14,6 +14,16 @@ enum class Emotion {
     Sad,
     Doubt,
     Sleepy,
+    // Midoryu additions
+    Love,
+    Shy,
+    Dizzy,
+    Unhinged,
+    Smug,
+    Fire,
+    Thinking,
+    Listening,
+    Error,
 };
 
 }  // namespace stackchan::avatar

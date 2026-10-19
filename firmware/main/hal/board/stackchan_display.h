@@ -19,6 +19,7 @@ private:
     int idle_expression_modifier_id_    = -1;
     int blink_modifier_id_              = -1;
     bool is_sleeping_                   = false;
+    bool is_listening_                  = false;
     uint8_t idle_motion_level_          = 2;
 
     lv_obj_t* preview_image_                         = nullptr;
