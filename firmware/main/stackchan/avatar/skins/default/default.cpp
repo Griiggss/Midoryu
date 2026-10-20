@@ -11,7 +11,7 @@
 using namespace uitk::lvgl_cpp;
 using namespace stackchan::avatar;
 
-static const int kRenderIntervalMs = 33;  // ~30 fps cap
+static const int kRenderIntervalMs = 66;  // ~15 fps cap: keeps the LVGL lock free for audio/network
 
 DefaultAvatar::~DefaultAvatar()
 {
@@ -130,12 +130,11 @@ void DefaultAvatar::render_face(uint32_t now)
     uint8_t* dst       = (uint8_t*)_draw_buf->data;
     uint32_t stride    = _draw_buf->header.stride;
     for (int y = 0; y < DragonFace::kHeight; y++) {
-        uint16_t* row = (uint16_t*)(dst + (size_t)(y * 2) * stride);
+        uint32_t* row = (uint32_t*)(dst + (size_t)(y * 2) * stride);
         const uint8_t* src = idx + y * DragonFace::kWidth;
         for (int x = 0; x < DragonFace::kWidth; x++) {
-            uint16_t c = lut[src[x]];
-            row[x * 2]     = c;
-            row[x * 2 + 1] = c;
+            uint32_t c = lut[src[x]];
+            row[x]     = c | (c << 16);
         }
         std::memcpy(dst + (size_t)(y * 2 + 1) * stride, row, 320 * sizeof(uint16_t));
     }
