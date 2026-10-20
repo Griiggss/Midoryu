@@ -50,6 +50,11 @@ void AppSetup::onOpen()
                   _destroy_menu    = true;
                   _need_warm_reset = true;
                   _worker          = std::make_unique<WifiSetupWorker>();
+              }},
+             {"Testing service",
+              [&]() {
+                  _destroy_menu = true;
+                  _worker       = std::make_unique<NetworkTestWorker>();
               }}},
         },
         {
