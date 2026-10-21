@@ -56,6 +56,12 @@ public:
 
     DragonFace();
 
+    /** Minimal look: glowing dragon eyes on black, no mouth, ears, horns or tattoo. */
+    void setEyesOnly(bool v)
+    {
+        _eyesOnly = v;
+    }
+
     /**
      * @brief Advance animation. Returns true when the picture needs to be redrawn.
      */
@@ -100,6 +106,7 @@ private:
     void drawHorn(int side);
     void drawTattoo();
     void drawEye(float cx, float cy, int dir, float sc, float browRaise, float openIn, float offx, float offy);
+    void drawEyeOnly(float cx, float cy, int dir, float sc, float openIn, float offx, float offy);
     void drawMouth(float openIn, float offx, float offy);
     void drawDecor();
     void drawParticles();
@@ -108,6 +115,7 @@ private:
               float s);
     void computePalette();
 
+    bool _eyesOnly = false;
     uint8_t _buf[kHeight][kWidth];
     uint8_t _pal[kPaletteLen][3];
 
