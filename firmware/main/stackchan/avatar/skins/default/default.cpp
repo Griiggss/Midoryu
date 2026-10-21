@@ -42,6 +42,9 @@ void DefaultAvatar::init(lv_obj_t* parent, const lv_font_t* font)
 
     // The dragon face is rendered into a 320x240 RGB565 canvas (2x nearest-neighbour from 160x120 pixels)
     _face     = std::make_unique<DragonFace>();
+#ifdef CONFIG_MIDORYU_EYES_ONLY
+    _face->setEyesOnly(true);
+#endif
     _draw_buf = lv_draw_buf_create(320, 240, LV_COLOR_FORMAT_RGB565, 0);
     if (_draw_buf) {
         _canvas = lv_canvas_create(_pannel->get());

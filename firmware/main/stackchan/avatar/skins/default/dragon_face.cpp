@@ -346,6 +346,67 @@ void DragonFace::drawEye(float cx, float cy, int dir, float sc, float browRaise,
     }
 }
 
+void DragonFace::drawEyeOnly(float cx, float cy, int dir, float sc, float openIn, float offx, float offy)
+{
+    const Params& p  = _cur;
+    const MoodDef& m = kMoods[_mood];
+    float ex = cx + offx, ey = cy + offy;
+
+    if (p.arch > .5f) {
+        // happy ^ eye with glow
+        float pts[24];
+        int n = quad(pts, 0, ex - 26, ey + 12, ex, ey - 34, ex + 26, ey + 12, 8, false);
+        strokePoly(pts, n, 9, SMOKE, false);
+        strokePoly(pts, n, 5, INK, false);
+        return;
+    }
+
+    float ob  = std::max(.05f, p.open * openIn);
+    float rx  = (24.f + p.pw * .8f) * sc;
+    float ry  = std::max(3.f, 36.f * sc * ob / .85f);
+    float rot = dir * p.slope * .4f;
+
+    switch (m.pupil) {
+        case PK_HEART:
+            fillEllipse(ex, ey, 30.f, 28.f, 0.f, SMOKE);
+            blit(kHeart, 7, 6, ex, ey + 2, 5.f, HEART, true);
+            break;
+        case PK_SPIRAL: {
+            float pts[130];
+            int n = 0;
+            for (float a = 0; a < 15.f && n < 62; a += .25f) {
+                float r = a * 2.4f;
+                pts[n * 2]     = ex + std::cos(a + _time * 8.f) * r;
+                pts[n * 2 + 1] = ey + std::sin(a + _time * 8.f) * r;
+                n++;
+            }
+            strokePoly(pts, n, 2, INK, false);
+            break;
+        }
+        case PK_X:
+            strokeLine(ex - 20, ey - 20, ex + 20, ey + 20, 3, INK);
+            strokeLine(ex + 20, ey - 20, ex - 20, ey + 20, 3, INK);
+            break;
+        case PK_DOT:
+            fillEllipse(ex, ey, 20.f, 20.f * std::min(1.f, openIn * 1.2f + .1f), 0.f, SMOKE);
+            fillEllipse(ex, ey, 12.f, 12.f * std::min(1.f, openIn * 1.2f + .1f), 0.f, INK);
+            break;
+        default:
+            fillEllipse(ex, ey, rx + 9.f, ry + 9.f, rot, SMOKE);
+            fillEllipse(ex, ey, rx + 4.f, ry + 4.f, rot, DARK);
+            fillEllipse(ex, ey, rx, ry, rot, INK);
+            if (ry > 8.f) {
+                fillEllipse(ex, ey, rx * .62f, ry * .62f, rot, TATTOO);
+                // dragon slit pupil
+                fillEllipse(ex, ey, std::max(3.f, rx * .13f), ry * .9f, rot, S);
+                float hx = -rx * .45f, hy = -ry * .55f;
+                float cs = std::cos(rot), sn = std::sin(rot);
+                fillRect(ex + hx * cs - hy * sn - 3, ey + hx * sn + hy * cs - 3, 6, 6, WHITE);
+            }
+            break;
+    }
+}
+
 void DragonFace::drawMouth(float openIn, float offx, float offy)
 {
     const Params& p = _cur;
@@ -401,7 +462,7 @@ void DragonFace::drawDecor()
 {
     uint16_t d = kMoods[_mood].deco;
     float t    = _time;
-    if (d & D_BLUSH) {
+    if ((d & D_BLUSH) && !_eyesOnly) {
         for (int i = 0; i < 3; i++) fillRect(74.f + i * 10.f, 146.f, 6.f, 2.f, INK);
     }
     if (d & D_VEIN) {
@@ -545,10 +606,17 @@ void DragonFace::computePalette()
         _pal[idx][1] = (uint8_t)clampf(g, 0, 255);
         _pal[idx][2] = (uint8_t)clampf(b, 0, 255);
     };
-    set(S, scr[0], scr[1], scr[2]);
-    set(INK, ink[0], ink[1], ink[2]);
-    set(DARK, dk[0], dk[1], dk[2]);
-    set(TATTOO, tat[0], tat[1], tat[2]);
+    if (_eyesOnly) {
+        set(S, 3, 6, 6);
+        set(INK, iris[0], iris[1], iris[2]);
+        set(DARK, iris[0] * .5f, iris[1] * .5f, iris[2] * .5f);
+        set(TATTOO, mixf(iris[0], 255.f, .6f), mixf(iris[1], 255.f, .6f), mixf(iris[2], 255.f, .6f));
+    } else {
+        set(S, scr[0], scr[1], scr[2]);
+        set(INK, ink[0], ink[1], ink[2]);
+        set(DARK, dk[0], dk[1], dk[2]);
+        set(TATTOO, tat[0], tat[1], tat[2]);
+    }
     set(WHITE, 255, 255, 255);
     set(TONGUE, 255, 105, 135);
     set(HEART, 255, 70, 140);
@@ -558,7 +626,11 @@ void DragonFace::computePalette()
     set(MAG, 255, 43, 214);
     set(YELLOW, 255, 245, 140);
     set(ORANGE, 255, 130, 0);
-    set(SMOKE, smk[0], smk[1], smk[2]);
+    if (_eyesOnly) {
+        set(SMOKE, iris[0] * .16f, iris[1] * .16f, iris[2] * .16f);
+    } else {
+        set(SMOKE, smk[0], smk[1], smk[2]);
+    }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -666,11 +738,13 @@ void DragonFace::render()
     const MoodDef& m = kMoods[_mood];
     const Params& p  = _cur;
 
-    drawEars(-1);
-    drawEars(1);
-    drawHorn(-1);
-    drawHorn(1);
-    drawTattoo();
+    if (!_eyesOnly) {
+        drawEars(-1);
+        drawEars(1);
+        drawHorn(-1);
+        drawHorn(1);
+        drawTattoo();
+    }
 
     // gaze lock / dizzy orbit
     float lockX = m.lockX, lockY = m.lockY;
@@ -679,17 +753,28 @@ void DragonFace::render()
         lockY = std::sin(_time * 5.f) * 4.f;
     }
     float aL = 1.f + p.asym * .25f, aR = 1.f - p.asym * .25f;
-    if (_in.eyeVisibleL) {
+    if (_eyesOnly) {
+        if (_in.eyeVisibleL) {
+            drawEyeOnly(88.f, 120.f, 1, p.size * aL * (1.f + _in.eyeSizeL * .35f), _in.eyeOpenL, _in.eyeOffLX + lockX,
+                        _in.eyeOffLY + lockY);
+        }
+        if (_in.eyeVisibleR) {
+            drawEyeOnly(232.f, 120.f, -1, p.size * aR * (1.f + _in.eyeSizeR * .35f), _in.eyeOpenR,
+                        _in.eyeOffRX + lockX, _in.eyeOffRY + lockY);
+        }
+    } else if (_in.eyeVisibleL) {
         drawEye(96.f, 104.f, 1, p.size * aL * (1.f + _in.eyeSizeL * .35f), p.brow + p.asym * .8f, _in.eyeOpenL,
                 _in.eyeOffLX + lockX, _in.eyeOffLY + lockY);
     }
-    if (_in.eyeVisibleR) {
+    if (!_eyesOnly && _in.eyeVisibleR) {
         drawEye(224.f, 104.f, -1, p.size * aR * (1.f + _in.eyeSizeR * .35f), p.brow - p.asym * .3f, _in.eyeOpenR,
                 _in.eyeOffRX + lockX, _in.eyeOffRY + lockY);
     }
-    fillRect(150, 124, 4, 4, INK);
-    fillRect(166, 124, 4, 4, INK);
-    if (_in.mouthVisible) {
+    if (!_eyesOnly) {
+        fillRect(150, 124, 4, 4, INK);
+        fillRect(166, 124, 4, 4, INK);
+    }
+    if (_in.mouthVisible && !_eyesOnly) {
         drawMouth(_in.mouthOpen, _in.mouthOffX, _in.mouthOffY);
     }
     drawDecor();
