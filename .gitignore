@@ -1,2 +1,16 @@
 .DS_Store
 .idea/
+# Build output & local config
+build/
+sdkconfig
+sdkconfig.old
+sdkconfig.defaults.local
+managed_components/
+.venv/
+
+# Self-hosted server: real config (holds API keys) and models
+midoryu-server/data/.config.yaml
+midoryu-server/models/
+
+# Prebuilt images are published as GitHub Releases, not committed
+*-merged.bin

@@ -1,32 +1,120 @@
-# StackChan Open-Source
+# 🐲 Midoryu
 
-<img src="https://m5stack-doc.oss-cn-shenzhen.aliyuncs.com/1205/K151_stack_chan_main_pictures_01.webp" width="60%">
+**Midoryu** (*midori* 緑 + *ryū* 竜, "green dragon") is a custom firmware for the **M5Stack StackChan** desktop robot.
+Same body, new soul: a pixel-art dragon face, an unhinged dragon personality, and an optional self-hosted voice server so the brain can run on your own PC.
 
-Here are StackChan related open-source resources, including source code of the StackChan firmware, remote controller firmware, mobile app (iOS and Android), and server. 
+> 🇩🇴 ¿Prefieres español? Lee **[README.es.md](README.es.md)**.
 
-Update of this repo could be a little late than the released firmware and mobile app. 
+Built on top of the open-source [m5stack/StackChan](https://github.com/m5stack/StackChan) (MIT) and, through it, [XiaoZhi ESP32](https://github.com/78/xiaozhi-esp32). Huge thanks to both projects.
 
-----
+---
 
-<img src="https://cdn.shopify.com/s/files/1/0056/7689/2250/files/5a589623895f65487717894d9240f6b8.png" width="60%">
+## What's different from stock StackChan
 
-**StackChan is a super kawaii AI desktop robot co-created by M5Stack and the user community.** It uses the M5Stack **flagship IoT development kit [CoreS3](https://docs.m5stack.com/en/core/CoreS3)** as its main controller, powered by an ESP32-S3 SoC featuring a 240 MHz dual-core processor, with 16MB Flash and 8MB PSRAM onboard, and supporting Wi-Fi and BLE. The main unit also integrates a 2.0-inch capacitive touch display with a high-strength glass cover, a 0.3 MP camera, a proximity & ambient light sensor, a 9-axis IMU (accelerometer + gyroscope + magnetometer), a microSD card slot, a 1W speaker, dual microphones, and power/reset buttons. 
+| Feature | Status |
+|---|---|
+| **Dragon face**: parametric pixel-art dragon with a kanji 造 tattoo and **15 expressions** (neutral, happy, angry, sad, doubt, sleepy, love, shy, dizzy, unhinged, smug, fire, thinking, listening, error) | ✅ working on device |
+| **Eyes-only face**: glowing slit-pupil dragon eyes on black, color changes with mood, no mouth, lighter on CPU | ✅ built, in testing |
+| XiaoZhi emotion tags + local triggers (listening, thinking, head pat, shake, reminder) mapped to expressions | ✅ |
+| Rendering capped at ~15 fps with a faster blit so audio and Wi‑Fi aren't starved | ✅ |
+| Upstream **StackChan v1.6.0** merged (more robust Wi‑Fi/network, avatar over local network) | ✅ |
+| Self-hosted voice server kit (Docker) on your own PC, official server stays the default | ✅ |
+| Retro-cyberpunk menus, error face on server loss, servo/LED/touch/IMU reactions | 🛠️ planned |
+| Phone app revamp | ⏸️ on hold |
 
-The **robot body**, connected to the main unit, includes a USB-C interface for power and data, a 550 mAh battery, two feedback servos (360-degree continuous rotation on the horizontal axis and 90-degree movement on the vertical axis), two rows totaling 12 RGB LEDs, infrared transmitter and receiver, a three-zone touch panel, and a full-featured NFC module. 
+Hardware: **StackChan K151** (M5Stack CoreS3, ESP32‑S3). No ESP‑NOW remote controller needed.
 
-The **factory firmware** is feature-rich, including an AI Agent, lively and expressive animations, ESP-NOW wireless remote control, and online app downloads. It can connect to a mobile app for video viewing, remote avatar control, and more, and also supports online updates (OTA). The product also supports programming via Arduino, UiFlow2, and other methods, and can connect to various expansion units in the M5Stack ecosystem, making it easy to implement a wide range of custom functions. 
+---
 
-> ⚠️ Do not forcibly rotate any movable parts connected to the motors by hand when you are unsure whether the motors are powered and under control, as this may cause hardware damage. 
+## Repo layout
 
-- Purchase link: [M5Stack Official Store](https://shop.m5stack.com/products/stackchan-kawaii-co-created-open-source-ai-desktop-robot) | [淘宝 Taobao](https://item.taobao.com/item.htm?id=1042238294510)
+```
+firmware/         ESP-IDF firmware (this is where Midoryu lives)
+  main/stackchan/avatar/skins/default/dragon_face.*   the dragon face
+midoryu-server/   Docker kit for the self-hosted voice server
+docs/             upstream README and extra notes
+app/ remote/ server/   untouched upstream StackChan parts (phone app, ESP-NOW remote, Go server)
+```
 
-- Product document page: [English](https://docs.m5stack.com/en/StackChan) | [日本語](https://docs.m5stack.com/ja/StackChan) | [中文](https://docs.m5stack.com/zh_CN/StackChan)
+---
 
-- Board support package: https://github.com/m5stack/StackChan-BSP
+## 1. Flash a prebuilt image (easiest, no installs)
 
-Thank you to the contributors of the StackChan community, especially: 
+Prebuilt images are published under **[Releases](../../releases)**. Each one is a single "merged" `.bin` that goes at address `0x0`.
 
-| ![](https://m5stack-doc.oss-cn-shenzhen.aliyuncs.com/1205/avatar_stack_chan.jpg) | ![](https://m5stack-doc.oss-cn-shenzhen.aliyuncs.com/1205/avatar_takao.jpg) |
-| -------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [@stack_chan](https://x.com/stack_chan)                                          | [@mongonta555](https://x.com/mongonta555)                                   |
-| Shinya Ishikawa                                                                  | Takao Akaki                                                                 |
+| File | Face | Server |
+|---|---|---|
+| `midoryu-v1.6.0-dragon-official-merged.bin` | Full dragon face | Official XiaoZhi cloud (default) |
+| `midoryu-v1.6.0-eyes-official-merged.bin` | Eyes only | Official XiaoZhi cloud |
+| `midoryu-v1.6.0-dragon-selfhost-…-merged.bin` | Full dragon face | Your own PC (IP baked in) |
+| `midoryu-v1.6.0-eyes-selfhost-…-merged.bin` | Eyes only | Your own PC (IP baked in) |
+
+Not sure? Take **dragon + official**.
+
+**Steps (Chrome or Edge, USB-C cable):**
+1. Plug the StackChan into your computer with USB-C.
+2. Put it in download mode: **hold the reset button (side of the CoreS3) about 3 seconds** until the internal green LED lights.
+3. Open <https://espressif.github.io/esptool-js/>.
+4. Click **Connect**, pick the USB serial port, and confirm.
+5. Under *Flash Address* type `0x0`, click **Choose File**, and select the `.bin` you downloaded.
+6. Click **Program** and wait for 100 %.
+7. Press the reset button once. The dragon wakes up. 🐉
+
+Flashing replaces the stock firmware; to go back, flash the stock image from [m5stack/StackChan](https://github.com/m5stack/StackChan) or the M5Burner tool.
+
+---
+
+## 2. Build from source
+
+Requirements: Linux/macOS/WSL, Python 3, Git, and **[ESP-IDF v5.5.4](https://docs.espressif.com/projects/esp-idf/en/v5.5.4/esp32s3/get-started/)** installed and exported (`. ./export.sh`). The build needs internet access to `components.espressif.com` and `dl.espressif.com`.
+
+```bash
+git clone https://github.com/Griiggss/Midoryu.git
+cd Midoryu/firmware
+python3 fetch_repos.py        # downloads XiaoZhi and applies the patches
+idf.py set-target esp32s3
+idf.py build
+idf.py -p <PORT> flash monitor   # e.g. COM5 or /dev/ttyACM0
+```
+
+To make a single file for the web flasher:
+
+```bash
+cd build
+python -m esptool --chip esp32s3 merge_bin -o midoryu-merged.bin @flash_args
+```
+
+### Options
+
+Copy `firmware/sdkconfig.defaults.local.example` to `firmware/sdkconfig.defaults.local` (git-ignored) and edit it:
+
+| Setting | What it does |
+|---|---|
+| `CONFIG_MIDORYU_EYES_ONLY=y` | Eyes-only face instead of the full dragon |
+| `CONFIG_OTA_URL="http://<PC-IP>:8003/xiaozhi/ota/"` | Point the robot at your self-hosted server |
+
+You can also toggle the eyes-only face in `idf.py menuconfig` → **Midoryu**.
+
+Host-side tests (no hardware): see [firmware/README.md](firmware/README.md).
+
+---
+
+## 3. Self-hosted voice server (optional)
+
+Run the brain on your own PC with Docker, using [xinnan-tech/xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server). The robot talks to your PC; the official server remains the default and is the fallback if you flash an "official" image.
+
+Everything lives in [`midoryu-server/`](midoryu-server/): `docker-compose.yml`, a config template with the dragon personality prompt, and a click-by-click guide (Spanish): [midoryu-server/README_ES.md](midoryu-server/README_ES.md).
+
+Quick version: install Docker Desktop → copy `data/.config.yaml.example` to `data/.config.yaml` → put in your PC's IP and your own LLM key → `docker compose up -d` → flash a `selfhost` image (or build with `CONFIG_OTA_URL`).
+
+> 🔑 **Never commit API keys.** The real `data/.config.yaml` is git-ignored; only the `.example` file is tracked. If a key ever leaks (chat, screenshot, commit), rotate it right away.
+
+---
+
+## Credits & license
+
+- [M5Stack](https://github.com/m5stack/StackChan) — StackChan hardware & firmware (MIT)
+- [XiaoZhi ESP32](https://github.com/78/xiaozhi-esp32) and [xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server)
+- Original StackChan README: [docs/UPSTREAM_README.md](docs/UPSTREAM_README.md)
+
+Released under the [MIT License](LICENSE), same as upstream.
