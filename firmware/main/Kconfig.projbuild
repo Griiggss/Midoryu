@@ -1,3 +1,13 @@
+menu "Midoryu"
+
+config MIDORYU_EYES_ONLY
+    bool "Minimal face: glowing dragon eyes on black, no mouth"
+    default n
+    help
+        Draws only the dragon eyes over a black background (lighter and more minimal than the full face).
+
+endmenu
+
 menu "StackChan Server"
 
 config STACKCHAN_SERVER_URL
@@ -789,6 +799,7 @@ config USE_AUDIO_DEBUGGER
         Enable audio debugger, send audio data through UDP to the host machine
 
 menu "WiFi Configuration Method"
+    depends on !BOARD_TYPE_M5STACK_STACK_CHAN
     help
         WiFi Configuration Method Selection
     config USE_HOTSPOT_WIFI_PROVISIONING
