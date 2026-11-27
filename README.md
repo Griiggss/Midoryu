@@ -1,5 +1,20 @@
 # 🐲 Midoryu
 
+<p align="center">
+  <img alt="Hardware" src="https://img.shields.io/badge/hardware-StackChan%20K151-39ff88?style=flat-square">
+  <img alt="MCU" src="https://img.shields.io/badge/MCU-ESP32--S3-0f6b3c?style=flat-square">
+  <img alt="ESP-IDF" src="https://img.shields.io/badge/ESP--IDF-5.5.4-e7352c?style=flat-square">
+  <img alt="Upstream" src="https://img.shields.io/badge/upstream-StackChan%20v1.6.0-ffb020?style=flat-square">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-ff2bd6?style=flat-square">
+</p>
+
+<p align="center">
+  <img src="docs/media/dragon-demo.gif" width="320" alt="Midoryu dragon face cycling through expressions">
+  &nbsp;&nbsp;
+  <img src="docs/media/eyes-demo.gif" width="320" alt="Midoryu eyes-only face cycling through expressions">
+  <br><sub>Left: full dragon face. Right: eyes-only face. Rendered by the real firmware code.</sub>
+</p>
+
 **Midoryu** (*midori* 緑 + *ryū* 竜, "green dragon") is a custom firmware for the **M5Stack StackChan** desktop robot.
 Same body, new soul: a pixel-art dragon face, an unhinged dragon personality, and an optional self-hosted voice server so the brain can run on your own PC.
 
@@ -23,6 +38,18 @@ Built on top of the open-source [m5stack/StackChan](https://github.com/m5stack/S
 | Phone app revamp | ⏸️ on hold |
 
 Hardware: **StackChan K151** (M5Stack CoreS3, ESP32‑S3). No ESP‑NOW remote controller needed.
+
+---
+
+## Gallery
+
+### Full dragon face: 15 expressions
+![Dragon face expressions](docs/media/dragon-expressions.png)
+
+### Eyes-only face: same 15 moods, color changes with the mood
+![Eyes-only expressions](docs/media/eyes-expressions.png)
+
+<sub>These images are rendered on a PC straight from `dragon_face.cpp` (the same code that runs on the robot), so they match the device. The harness is in [`docs/media/render_faces.cpp.txt`](docs/media/render_faces.cpp.txt).</sub>
 
 ---
 
