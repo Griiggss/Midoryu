@@ -1,0 +1,6 @@
+# Copy to "sdkconfig.defaults.local" (git-ignored) to build the self-hosted flavor.
+# Replace the IP with your PC's local IP. Never put API keys here: keys live in the server's .config.yaml.
+CONFIG_OTA_URL="http://192.168.1.50:8003/xiaozhi/ota/"
+
+# Optional: minimal "dragon eyes only" face (glowing eyes on black, no mouth)
+# CONFIG_MIDORYU_EYES_ONLY=y
