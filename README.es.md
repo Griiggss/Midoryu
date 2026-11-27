@@ -6,12 +6,23 @@ Construido sobre [m5stack/StackChan](https://github.com/m5stack/StackChan) (MIT)
 
 English version: **[README.md](README.md)**.
 
+<p align="center">
+  <img src="docs/media/dragon-demo.gif" width="320" alt="Cara de dragón">
+  &nbsp;&nbsp;
+  <img src="docs/media/eyes-demo.gif" width="320" alt="Cara solo-ojos">
+</p>
+
 ## Qué trae
 
 - **Cara de dragón** con 15 expresiones y tatuaje con el kanji 造.
 - **Versión solo-ojos**: ojos de dragón brillando sobre fondo negro, sin boca, más liviana.
 - Servidor oficial de XiaoZhi por defecto; **servidor propio** en Docker como opción (carpeta `midoryu-server/`).
 - StackChan **v1.6.0** de upstream ya integrado.
+
+## Galería
+
+![Expresiones del dragón](docs/media/dragon-expressions.png)
+![Expresiones solo-ojos](docs/media/eyes-expressions.png)
 
 ## Cómo flashearlo (paso a paso, sin instalar nada)
 
