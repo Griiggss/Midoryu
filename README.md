@@ -15,6 +15,9 @@
   <br><sub>Left: full dragon face. Right: eyes-only face. Rendered by the real firmware code.</sub>
 </p>
 
+> 💾 **Want the animations?** Click the GIF on GitHub, then use **Download raw file** (the ⬇ button) or right-click → *Save image as*. Links: [dragon-demo.gif](docs/media/dragon-demo.gif?raw=true) · [eyes-demo.gif](docs/media/eyes-demo.gif?raw=true). Some image viewers (like Windows Photos) only show the first frame of a GIF: open it in a browser, or use the MP4 versions: [dragon-demo.mp4](docs/media/dragon-demo.mp4?raw=true) · [eyes-demo.mp4](docs/media/eyes-demo.mp4?raw=true).
+
+
 **Midoryu** (*midori* 緑 + *ryū* 竜, "green dragon") is a custom firmware for the **M5Stack StackChan** desktop robot.
 Same body, new soul: a pixel-art dragon face, an unhinged dragon personality, and an optional self-hosted voice server so the brain can run on your own PC.
 
