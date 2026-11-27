@@ -49,8 +49,7 @@ public:
                 int mouth_rotation = _toggle_phase ? -25 : 25;
 
                 auto& avatar = stackchan.avatar();
-                avatar.mouth().setRotation(mouth_rotation);
-                avatar.mouth().setWeight(65);
+                (void)mouth_rotation;
             }
 
             //  Lock motion modify and move home
@@ -76,16 +75,9 @@ private:
 
             auto& avatar = stackchan.avatar();
 
+            _prev_emotion = avatar.getEmotion();
             avatar.setModifyLock(true);
-            avatar.leftEye().setVisible(false);
-            avatar.rightEye().setVisible(false);
-
-            stackchan.avatar().removeDecorator(_dizzy_decorator_id);
-            stackchan.avatar().removeDecorator(_shy_decorator_id);
-            _dizzy_decorator_id =
-                stackchan.avatar().addDecorator(std::make_unique<avatar::DizzyDecorator>(lv_screen_active(), 0, 300));
-            _shy_decorator_id =
-                stackchan.avatar().addDecorator(std::make_unique<avatar::ShyDecorator>(lv_screen_active(), 0));
+            avatar.setEmotion(avatar::Emotion::Dizzy);
         }
 
         // 刷新恢复时间和切换时间
@@ -103,15 +95,9 @@ private:
 
         auto& avatar = stackchan.avatar();
         avatar.setModifyLock(false);
-        avatar.leftEye().setVisible(true);
-        avatar.rightEye().setVisible(true);
+        avatar.setEmotion(_prev_emotion);
         avatar.mouth().setWeight(0);
         avatar.mouth().setRotation(0);
-
-        stackchan.avatar().removeDecorator(_dizzy_decorator_id);
-        stackchan.avatar().removeDecorator(_shy_decorator_id);
-        _dizzy_decorator_id = -1;
-        _shy_decorator_id   = -1;
 
         auto& motion = stackchan.motion();
         motion.setModifyLock(false);
@@ -130,8 +116,7 @@ private:
     uint32_t _next_toggle_tick = 0;
     uint32_t _reaction_duration_ms;
 
-    int _dizzy_decorator_id = -1;
-    int _shy_decorator_id   = -1;
+    avatar::Emotion _prev_emotion = avatar::Emotion::Neutral;
 };
 
 }  // namespace stackchan
