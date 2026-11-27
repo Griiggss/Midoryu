@@ -1,0 +1,21 @@
+#include "dragon_face.h"
+#include <cstdio>
+#include <cstdlib>
+using namespace stackchan::avatar;
+int main(int argc,char**argv){
+  int eyes=atoi(argv[1]); const char* out=argv[2];
+  for(int m=0;m<DragonFace::MoodCount;m++){
+    DragonFace f; f.setEyesOnly(eyes);
+    DragonFace::Input in; in.mood=m; in.mouthOpen=0;
+    uint32_t t=0;
+    for(int i=0;i<4;i++){ // GIF frames sampled after settle
+      for(int k=0;k<(i==0?60:8);k++){ t+=66; f.update(in,t);}
+      f.render();
+      char fn[256]; sprintf(fn,"%s_%02d_%d.ppm",out,m,i);
+      FILE*fp=fopen(fn,"wb"); fprintf(fp,"P6\n160 120\n255\n");
+      const uint8_t*ix=f.indices(); auto pal=f.palette();
+      for(int p=0;p<160*120;p++) fwrite(pal[ix[p]],1,3,fp);
+      fclose(fp);
+    }
+  }
+}
